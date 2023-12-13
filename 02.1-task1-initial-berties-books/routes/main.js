@@ -29,7 +29,23 @@ module.exports = function(app, shopData) {
         res.render('register.ejs', shopData);                                                                     
     });                                                                                                 
     app.post('/registered', function (req,res) {
-        // saving data in database
+        // Saving data in database
+        const bcrypt = require('bcrypt');
+        const saltRounds = 10;
+        const plainPassword = req.body.password;
+        bcrypt.hash(plainPassword, saltRounds, function(err, hashedPassword) {
+            // saving data in database
+           let sqlquery = "INSERT INTO usercredentials (username, first_name, last_name, email, hashedPassword) VALUES (?,?,?,?,?)";
+           // execute sql query
+           let newrecord = [req.body.username, req.body.first, req.body.last, req.body.email, hashedPassword];
+           db.query(sqlquery, newrecord, (err, result) => {
+             if (err) {
+               return console.error(err.message);
+             }
+             else
+             res.send(' These user details are added to database, name: '+ req.body.username + ' price '+ req.body.email);
+             });
+        })
         res.send(' Hello '+ req.body.first + ' '+ req.body.last +' you are now registered!  We will send an email to you at ' + req.body.email);                                                                              
     }); 
     app.get('/list', function(req, res) {
@@ -51,9 +67,9 @@ module.exports = function(app, shopData) {
  
      app.post('/bookadded', function (req,res) {
            // saving data in database
-           let sqlquery = "INSERT INTO books (name, price) VALUES (?,?)";
+           let sqlquery = "INSERT INTO Cars (name, price, bodytype, fuel, description) VALUES (?,?,?,?,?)";
            // execute sql query
-           let newrecord = [req.body.name, req.body.price];
+           let newrecord = [req.body.name, req.body.price, req.body.bodytype, req.body.fuel, req.body.description];
            db.query(sqlquery, newrecord, (err, result) => {
              if (err) {
                return console.error(err.message);
