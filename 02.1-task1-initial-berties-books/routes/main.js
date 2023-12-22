@@ -1,5 +1,9 @@
 module.exports = function(app, shopData) {
-
+    const redirectLogin = (req, res, next) => {
+        if (!req.session.userId) {
+          res.redirect('./login')
+        } else { next (); }
+    }
     // Handle our routes
     app.get('/',function(req,res){
         res.render('index.ejs', shopData)
@@ -25,6 +29,15 @@ module.exports = function(app, shopData) {
             res.render("list.ejs", newData)
          });        
     });
+    app.get('/logout', redirectLogin, (req,res) => {
+      req.session.destroy(err => {
+      if (err) {
+        return res.redirect('./')
+      }
+      res.send('you are now logged out. <a href='+'./'+'>Home</a>');
+      })
+  })
+
     app.get('/register', function (req,res) {
         res.render('register.ejs', shopData);                                                                     
     });                                                                                                 
@@ -49,15 +62,29 @@ module.exports = function(app, shopData) {
         res.send(' Hello '+ req.body.first + ' '+ req.body.last +' you are now registered!  We will send an email to you at ' + req.body.email);                                                                              
     }); 
     app.get('/list', function(req, res) {
-        let sqlquery = "SELECT * FROM books"; // query database to get all the books
+        let sqlquery = "SELECT name FROM cars"; // query database to get all the books
         // execute sql query
         db.query(sqlquery, (err, result) => {
             if (err) {
                 res.redirect('./'); 
             }
-            let newData = Object.assign({}, shopData, {availableBooks:result});
+            let newData = Object.assign({}, shopData, {availableCars:result});
             console.log(newData)
             res.render("list.ejs", newData)
+         });
+    });
+    app.get('/listusers', function(req, res) {
+        // Query database to get all the users
+        let sqlquery = "SELECT * FROM usercredentials";
+
+        // Execute sql query
+        db.query(sqlquery, (err, result) => {
+            if (err) {
+                res.redirect('./');
+            }
+            let newData = Object.assign({}, shopData, {Outputlist:result});
+            console.log(newData)
+            res.render("listusers.ejs", newData)
          });
     });
 
@@ -90,5 +117,46 @@ module.exports = function(app, shopData) {
           res.render("bargains.ejs", newData)
         });
     });       
+    app.get('/login', function (req,res) {
+        res.render('login.ejs', shopData);
+        });
+    
+        app.post('/signedin', function(req, res) {
+            // Compare the form data with the data stored in the database
+            let sqlquery = "SELECT hashedPassword FROM usercredentials WHERE username = ?"; // query database to get the hashed password for the user
+            // execute sql query
+            let username = (req.body.username);
+            db.query(sqlquery, username, (err, result) => {
+              if (err) {
+                return console.error(err.message);
+              }
+              else if (result.length == 0) {
+                // No user found with that username
+                res.send('Invalid username or password');
+              }
+              else {
+                // User found, compare the passwords
+                let hashedPassword = result[0].hashedPassword;
+                const bcrypt = require('bcrypt');
+                bcrypt.compare((req.body.password), hashedPassword, function(err, result) {
+                  if (err) {
+                    // Handle error
+                    return console.error(err.message);
+                  }
+                  else if (result == true) {
+                    req.session.userId = (req.body.username)
+                    // The passwords match, login successful
+                    res.send('Welcome, ' + (req.body.username) + '!' + '<a href='+'./'+'> Home</a>');
+        
+        
+                  }
+                  else {
+                    //  login failed
+                    res.send('Invalid username or password');
+                  }
+                });
+              }
+            });
+          });
 
 }

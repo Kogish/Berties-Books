@@ -6,11 +6,11 @@
   </head>
   <body>
     <h1><%=shopName%> Shop</h1>
-    <h2>Here are the books that we sell:</h2>
+    <h2>Here are the cars that we sell:</h2>
     <ul>
-      <% availableBooks.forEach(function(book) { %>
-        <li><%= book.name %>, £<%=book.price%> </li>
-      <% }) %>
+      <% availableCars.forEach(Cars =>  { %>
+        <li><%= Cars.name %>, <%= Cars.price %>, <%= Cars.bodytype %>, <%= Cars.fuel %></li>
+        <% }) %>
     </ul>
     </body>
 </html>

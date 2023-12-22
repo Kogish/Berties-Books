@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Welcome to <%=shopName%></title>
+    <link rel="stylesheet"  type="text/css" href="/main.css" />
+  </head>
+  <body>
+    <h1><%=shopName%> Shop</h1>
+    <h2>Here are the list of users:</h2>
+    <ul>
+      <% Outputlist.forEach(function(usercredentials) { %>
+        <li><%= usercredentials.username %>, <%=usercredentials.first_name%>, <%=usercredentials.last_name%>, <%=usercredentials.email%> </li>
+      <% }) %>
+    </ul>
+    </body>
+</html>
